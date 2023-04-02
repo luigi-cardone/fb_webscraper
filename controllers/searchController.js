@@ -1,11 +1,10 @@
 import Search from './classes/search.js'
 import fs from 'fs'
 import mysql from 'mysql'
-import dotenv from 'dotenv'
 import util from 'util'
-dotenv.config()
-const search = new Search(5, process.env.FACEBOOK_EMAIL, process.env.FACEBOOK_PASSWORD)
 const config = JSON.parse(fs.readFileSync('db_config.json'))
+const fb_user = JSON.parse(fs.readFileSync('fb_config.json'))
+const search = new Search(5, fb_user.user, fb_user.password)
 
 const db = mysql.createConnection(config);
 
