@@ -5,7 +5,13 @@ import dotenv from 'dotenv'
 import util from 'util'
 dotenv.config()
 const search = new Search(5, process.env.FACEBOOK_EMAIL, process.env.FACEBOOK_PASSWORD)
-const config = JSON.parse(fs.readFileSync('db_config.json'))
+// const config = JSON.parse(fs.readFileSync('db_config.json'))
+const config = {
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
+}
 const db = mysql.createConnection(config);
 
 db.connect()
