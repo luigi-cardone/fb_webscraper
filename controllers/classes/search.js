@@ -60,7 +60,6 @@ export default class Search{
               if(!(duplicates.includes(currentCar["urn"]))) {
                 carData.push(currentCar)
                 }
-              console.log(car)
             }
             catch(err){
             }
