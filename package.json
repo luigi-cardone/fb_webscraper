@@ -9,7 +9,7 @@
     "file-saver": "^2.0.5",
     "json2csv": "^6.0.0-alpha.2",
     "mysql": "^2.18.1",
-    "puppeteer": "^19.7.2",
+    "puppeteer": "^19.8.5",
     "puppeteer-cluster": "^0.23.0"
   }
 }
