@@ -4,7 +4,6 @@ import mysql from 'mysql'
 import util from 'util'
 const config = JSON.parse(fs.readFileSync('db_config.json'))
 const fb_user = JSON.parse(fs.readFileSync('fb_config.json'))
-console.log(fb_user.user)
 const search = new Search(5, fb_user.user, fb_user.password)
 
 const db = mysql.createConnection(config);
