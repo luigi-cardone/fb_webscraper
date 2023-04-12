@@ -10,7 +10,7 @@ export default class Search{
     }
     
     main = async (duplicates) => {
-        this.browser = await puppeteer.launch({ headless: 1 });
+        this.browser = await puppeteer.launch({ headless: 1 , executablePath: 'chrome-win/chrome.exe'});
         this.page = await this.browser.newPage();
         const page = this.page
         const context = this.browser.defaultBrowserContext();
@@ -45,12 +45,16 @@ export default class Search{
         }
         const cars = await page.$x(card_div_path);
         const carData = []
+        const links = []
         for (let car of cars) {
           // Prendiamo le informazioni della macchina
           var currentCar = {}
           try{
               currentCar["urn"] = (await car?.$eval('a', el => el?.href)).split("/")[5]
               currentCar["url"] = await car?.$eval('a', el => el?.href)
+              const userData = await this.getContacts(currentCar.url)
+              currentCar["advertiser_name"] = userData.user_name
+              currentCar["advertiser_phone"] = userData.user_id
               currentCar["price"] = (await car?.$eval('a', el => el?.children[0]?.children[1]?.children[0]?.textContent.replaceAll("€",'').replaceAll(".", ""))).trimStart().replace(" ", "-")
               currentCar["register_year"] = await car?.$eval('a', el => el?.children[0]?.children[1]?.children[1]?.textContent.slice(0,4))
               currentCar["subject"] = await car?.$eval('a', el => el?.children[0]?.children[1]?.children[1]?.textContent.slice(4).replace(" ", ""))
@@ -64,8 +68,8 @@ export default class Search{
             catch(err){
             }
         }
-        await this.browser.close();
         await this.convertToCSV(carData, "results")
+        await this.browser.close()
         return carData
     }
 
@@ -88,7 +92,7 @@ export default class Search{
         })
     }
 
-    async convertToCSV(data, toFileName){
+    convertToCSV = async(data, toFileName) => {
         const csvFields = Object?.keys(data[0])
         const parser = new JSON2CSVParser({fields: csvFields, delimiter: ";"})
         var csvData = parser.parse(data)
@@ -102,7 +106,7 @@ export default class Search{
         })
     }
 
-    async getDuplicates() {
+    getDuplicates = async() => {
         var oldRunLinks = []
         await fsPromises.readFile('Temp/duplicates.txt', { encoding: "utf-8" })
             .then(response => oldRunLinks = JSON.parse(response))
@@ -111,10 +115,27 @@ export default class Search{
         return oldRunLinks
     }
 
-    async writeDuplicates(newDuplicates) {
+    writeDuplicates = async (newDuplicates) => {
         await fsPromises.writeFile('Temp/duplicates.txt', JSON.stringify(newDuplicates), { encoding: "utf-8" })
             .then(response => "Duplicates updated correctly")
             .catch(() => {console.log(err); return 0})
         return 1
+    }
+
+    
+    getContacts = async (link) => {
+        const page = await this.browser.newPage()
+        await page.goto(link, { waitUntil: 'networkidle2' });
+        try{
+            const cookieButton = await page.$x('//*[@id="facebook"]/body/div[2]/div[1]/div/div[2]/div/div/div/div[2]/div/div[1]/div[2]/div/div[1]/div/span/span')
+            cookieButton[0].click()
+        }
+        catch(err){}
+        const elHandler = await page.$x('/html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div[2]/div/div/div/div/div/div[2]/div/div[2]/div/div[1]/div[1]/div[7]/div/div[2]/div[1]/div/div/div/div/div[2]/div/div/div/div/span/span/div/div/a')
+        let user_name = await page.evaluate(el => el.textContent, elHandler[0]);
+        let user_id = (await page.evaluate(el => el.href, elHandler[0])).split("/")[5];
+        page.close()
+        console.log("Element evaluated")
+        return {user_id, user_name}
     }
 }
