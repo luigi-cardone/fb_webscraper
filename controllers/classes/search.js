@@ -10,7 +10,8 @@ export default class Search{
     }
     
     main = async (duplicates) => {
-        this.browser = await puppeteer.launch({ headless: 1 , executablePath: 'chrome-win/chrome.exe'});
+        console.log(puppeteer.executablePath())
+        this.browser = await puppeteer.launch({executablePath: "chrome-win/chrome.exe"});
         this.page = await this.browser.newPage();
         const page = this.page
         const context = this.browser.defaultBrowserContext();
