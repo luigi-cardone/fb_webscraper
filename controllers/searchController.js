@@ -4,7 +4,6 @@ import util from 'util'
 import dotenv from 'dotenv'
 dotenv.config()
 const search = new Search(5, process.env.FACEBOOK_EMAIL, process.env.FACEBOOK_PASSWORD)
-
 const db = mysql.createConnection({
   host : process.env.DB_HOST,
   user : process.env.DB_USER,
@@ -13,7 +12,13 @@ const db = mysql.createConnection({
 });
 
 export default async function Scraper() {
-  db.connect()
+  try{
+    db.connect()
+  }
+  catch (err){
+    console.log(err)
+    return 0
+  }
   const query = util.promisify(db.query).bind(db)
   const duplicates = await query('SELECT `urn` FROM `cars_facebook` WHERE 1')
   console.log("Got the following duplicates number: " + duplicates.length)
