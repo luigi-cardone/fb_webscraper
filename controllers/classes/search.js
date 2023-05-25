@@ -10,18 +10,18 @@ export default class Search{
     }
     
     main = async (duplicates) => {
-        console.log(puppeteer.executablePath())
-        this.browser = await puppeteer.launch({executablePath: "chrome-win/chrome.exe"});
+        this.browser = await puppeteer.launch({headless: 1});
         this.page = await this.browser.newPage();
         const page = this.page
+        page.setDefaultNavigationTimeout(60000)
         const context = this.browser.defaultBrowserContext();
         context.overridePermissions("https://www.facebook.com", ["geolocation", "notifications"]);
         await page.setViewport({ width: 1200, height: 800 });
         // bypass facebook login
         await page.goto('https://www.facebook.com/marketplace/category/vehicles', { waitUntil: 'networkidle2' });
         console.log("Authentication in progress...")
-        const cookieButton = await page.$x('/html/body/div[3]/div[2]/div/div/div/div/div[3]/button[1]')
-        cookieButton[0].click()
+        const cookieButton = await page.$x('/html/body/div[3]/div[2]/div/div/div/div/div[4]/button[1]')
+        cookieButton[0]?.click()
         // wait for Facebook login form
         await page.waitForSelector('#email');
         // click Accept cookies button if it exist
@@ -32,11 +32,11 @@ export default class Search{
         await page.evaluate(selector => document.querySelector(selector).click(), 'input[value="Log In"],#loginbutton');
         console.log('Login completed')
         await page.waitForNavigation({waitUntil: 'networkidle2'});
-        console.log('Page downloaded')
-      
+        
         // Analizziamo ogni annuncio
-        await page.waitForXPath('//div[@aria-label="Raccolta di articoli di Marketplace"]')
+        await page.waitForSelector('div[aria-label="Raccolta di articoli di Marketplace"]')
         const card_div_path = '/html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div[2]/div/div/div[5]/div/div[2]/div'
+        console.log('Page downloaded')
         var count = this.scrollCount
         while( count > 0){
             await this.autoScroll()
@@ -46,7 +46,6 @@ export default class Search{
         }
         const cars = await page.$x(card_div_path);
         const carData = []
-        const links = []
         for (let car of cars) {
           // Prendiamo le informazioni della macchina
           var currentCar = {}
