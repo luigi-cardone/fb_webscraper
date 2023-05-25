@@ -10,7 +10,18 @@ export default class Search{
     }
     
     main = async (duplicates) => {
-        this.browser = await puppeteer.launch({headless: 1});
+        this.browser = await puppeteer.launch({
+            args: [
+              "--disable-setuid-sandbox",
+              "--no-sandbox",
+              "--single-process",
+              "--no-zygote",
+            ],
+            executablePath:
+              process.env.NODE_ENV === "production"
+                ? process.env.PUPPETEER_EXECUTABLE_PATH
+                : puppeteer.executablePath(),
+          });
         this.page = await this.browser.newPage();
         const page = this.page
         page.setDefaultNavigationTimeout(60000)
