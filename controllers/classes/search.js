@@ -11,6 +11,7 @@ export default class Search{
     
     main = async (duplicates) => {
         this.browser = await puppeteer.launch({
+            headless: 1,
             args: [
               "--disable-setuid-sandbox",
               "--no-sandbox",
@@ -24,12 +25,12 @@ export default class Search{
           });
         this.page = await this.browser.newPage();
         const page = this.page
-        page.setDefaultNavigationTimeout(60000)
+        const client = await page.target().createCDPSession();
         const context = this.browser.defaultBrowserContext();
         context.overridePermissions("https://www.facebook.com", ["geolocation", "notifications"]);
         await page.setViewport({ width: 1200, height: 800 });
         // bypass facebook login
-        await page.goto('https://www.facebook.com/marketplace/category/vehicles', { waitUntil: 'networkidle2' });
+        await page.goto('https://www.facebook.com/marketplace/category/cars', { waitUntil: 'networkidle2' });
         console.log("Authentication in progress...")
         const cookieButton = await page.$x('/html/body/div[3]/div[2]/div/div/div/div/div[4]/button[1]')
         cookieButton[0]?.click()

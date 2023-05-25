@@ -4,8 +4,9 @@ const app = express()
 
 const PORT = process.env.PORT || 4000
 
-app.get("/scraper", (req, res) =>{
-    Scraper()
+app.get("/scraper", async (req, res) =>{
+    await Scraper()
+    res.send("Done")
 }
 )
 
