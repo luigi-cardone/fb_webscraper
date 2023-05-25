@@ -1,12 +1,16 @@
 import Search from './classes/search.js'
-import fs from 'fs'
 import mysql from 'mysql'
 import util from 'util'
-const config = JSON.parse(fs.readFileSync('db_config.json'))
-const fb_user = JSON.parse(fs.readFileSync('fb_config.json'))
-const search = new Search(5, fb_user.user, fb_user.password)
+import dotenv from 'dotenv'
+dotenv.config()
+const search = new Search(5, process.env.FACEBOOK_EMAIL, process.env.FACEBOOK_PASSWORD)
 
-const db = mysql.createConnection(config);
+const db = mysql.createConnection({
+  host : process.env.DB_HOST,
+  user : process.env.DB_USER,
+  password : process.env.DB_PASSWORD,
+  database : process.env.DB_NAME
+});
 
 export default async function Scraper() {
   db.connect()
